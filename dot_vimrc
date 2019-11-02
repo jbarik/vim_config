@@ -1,0 +1,256 @@
+set t_Co=256
+if (has("termguicolors"))
+   set termguicolors
+   "set cursorline
+   "echo "Terminal has gui colors "
+endif
+
+"enable python3. Which python gets enabled, depends on which version
+"got invoked first. So invoking python3 :
+"py3 print("This vim session uses python3")
+if has('python3')
+   let g:pymode_python = 'python3'
+   py3 print("This vim session uses python3")
+endif
+
+"================= Python Code ==========================================
+
+python3 << EOF
+import os, re, vim
+#working_dir = "/local-ssd/jbarik/Bmasklib.latest_pass/";
+#base_dir = "Bmasklib.latest_pass";
+working_dir = os.getcwd();
+base_dir = os.path.basename(os.path.normpath((working_dir)));
+
+re_expression = r"(/.*)(/matlab/+.*)";
+p = re.compile(re_expression);
+m = p.match(working_dir);
+if m is not None:
+   working_dir = m.group(1);
+   base_dir = os.path.basename(os.path.normpath(m.group(1)));
+
+vim.command("let base_dir = '%s'"% base_dir);
+vim.command("let working_dir = '%s'"% working_dir);
+print("Base directory is:", base_dir);
+print("Working directory is:", working_dir);
+
+EOF
+
+"========================================================================
+
+" To show glyphs
+set encoding=utf8
+
+" Use Vim settings, rather then Vi settings (much better!).
+" This must be first, because it changes other options as a side effect.
+set nocompatible
+
+syn on
+set nu               " Line numbers should be shown
+set ruler            " Show line number and col number of cursor
+set backspace=2      " make backspace work like most other apps
+set showmatch        " Bracket matching
+set vb t_vb=         " No beep sound
+set autowrite        " Autowrite is to save files while changing Buffers
+set mouse=a          " Enable mouse in all modes "a" for GUI
+set showbreak=↪
+"set nocp
+"set virtualedit=all "allows cursor to move beyond end of line
+
+" ================ Indention ===========================
+set cindent shiftwidth=3
+set softtabstop=3 " Make Vim treat <Tab> key as 3 spaces, but respect hard Tabs.
+set shiftwidth=3
+set expandtab     " Turn Tab keypresses into spaces. You can still insert
+                  " real Tabs as [Ctrl]-V [Tab].
+
+" ================ Fold =============================
+"set foldmethod=syntax
+"set foldnestmax=3
+"set foldcolumn=0 " used to show fold info on left side of window
+""set foldexpr=FoldBrace()
+""set foldmethod=expr
+""set foldlevelstart=99
+set nofoldenable " disable folds
+
+" ================ Completion ======================
+"set completeopt=menu,menuone,longest,preview " cause issues for ycm
+set completeopt=menuone,preview
+set wildmenu
+set wildmode=list:longest,full
+
+" ================ Scroll ===========================
+set scrolloff=0   " This value if larger keeps cursur line in center of screen
+
+" ================ Search ===========================
+set hlsearch      " Highlight search
+set ic            " Ignore case
+set incsearch     " Find the next match as we type the search
+set smartcase     " ... Unless we type a capital
+
+" Change leader to a comma because the backslash is too far away
+" That means all \x commands turn into ,x
+let mapleader=","
+
+" ================ Turn Off Swap Files ====================
+set noswapfile
+set nobackup
+set nowritebackup
+
+" ================ Modeline settings ======================
+"modelines allow you to set variables specific to a file.
+"By default, the first and last five lines are read by vim
+"for variable settings. For example, if you put the following
+"in the last line of a C program, you would get a textwidth of
+"60 chars when editing that file:
+" /* vim: tw=60 ts=2: */
+
+set modeline
+set modelines=1
+" ================ Modeline settings ======================
+
+" Minimum height of a window - 10 lines
+"
+" Need to reduce winheight to winminheight. Otherwise
+" at start up you see messages like E36: Not enough room
+"set winheight=8
+"set winminheight=10
+"set winheight=30
+
+" ================ ctags and cscope settings ==============
+"For local tags
+if filereadable("tags")
+    set tags=tags
+endif
+
+set tags+=~jbarik/.vim/tags/cpp
+set tags+=~jbarik/.vim/tags/gl
+set tags+=/local/jbarik/ctags_files/$BASEDIR/tags
+set tags+=/local/jbarik/ctags_files/$BASEDIR/toolbox/tags
+
+if has("cscope")
+    exe "cscope add /local/jbarik/cscope_files/$BASEDIR"
+    exe "cscope add /local/jbarik/cscope_files/$BASEDIR/toolbox"
+endif
+
+"===================== Taglist settings ====================
+let Tlist_Use_Right_Window = 1
+
+au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+
+let g:MultipleSearchMaxColors = 5
+nnoremap <silent> <Leader>* :execute ':Search \<' . expand('<cword>') . '\>'<cr>
+
+" Specify a directory for plugins
+" - For Neovim: ~/.local/share/nvim/plugged
+" - Avoid using standard Vim directory names like 'plugin'
+call plug#begin('~/.vim/plugged')
+" Make sure you use single quotes
+
+" Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
+Plug 'Shougo/neocomplete.vim'
+"Plug 'Shougo/unite.vim'
+" Keeping Unite and denite together till all my
+" Unite usages are moved to denite
+" Commit was made on Dec 17, 2018
+Plug 'Shougo/denite.nvim', {'commit': 'c21dd10b6d1c4fd3805b130e1a6551daadb8c111'}
+
+Plug 'majutsushi/tagbar'
+
+" Both the following plugins are required
+Plug 'm-pilia/vim-ccls'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
+
+Plug 'sheerun/vim-polyglot'
+Plug 'Valloric/YouCompleteMe'
+Plug 'vim-scripts/headerguard'
+" This is for code snippets, header guard
+Plug 'mbbill/code_complete'
+Plug 'nfvs/vim-perforce'
+Plug 'w0rp/ale'
+
+Plug 'Konfekt/FastFold'
+Plug 'danro/rename.vim'
+Plug 'vim-scripts/DrawIt'
+Plug 'tpope/vim-obsession'
+Plug 'haya14busa/vim-asterisk'
+Plug 'easymotion/vim-easymotion'
+Plug 'junegunn/vim-easy-align'
+Plug 'chrisbra/vim-diff-enhanced'
+Plug 'fholgado/minibufexpl.vim'
+Plug 'itchyny/lightline.vim'
+Plug 'maximbaz/lightline-trailing-whitespace'
+
+Plug 'jceb/vim-orgmode'
+Plug 'tpope/vim-speeddating' " Required by vim-orgmode
+Plug 'vim-scripts/SyntaxRange'
+Plug 'vim-scripts/SyntaxAttr.vim'
+"Plug 'jlanzarotta/bufexplorer' " Try it sometime
+"Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+"Plug 'junegunn/fzf.vim'
+" vimp4python doesn't have python3 support
+" the script needs to be exported to python3
+"Plug 'gdw2/vimp4python'
+
+" Initialize plugin system
+call plug#end()
+
+" ================ Few utility functions =====================
+
+" For force-write(w!) change the file permission to 755
+augroup ChangeFilePermsBeforeWriting
+      au!
+      au BufWritePre *
+          \ : if filereadable(expand('<afile>')) &&
+          \      !filewritable(expand('<afile>')) && has('python')
+          \ |     exec 'py import os, stat, vim'
+          \ |     exec 'py os.chmod(vim.current.buffer.name, 0755)'
+          \ | endif
+augroup END
+
+"set colorcolumn and settings. Keep the width at 85 column and set the colors
+"let &colorcolumn=join(range(85,999),",")
+"Method to toggle colorcolumn
+function! g:ToggleColorColumn()
+    if &colorcolumn !=''
+        set colorcolumn&
+    else
+        set colorcolumn=85
+    endif
+endfunction
+
+"Show the current function name
+fun! ShowFuncName()
+  let lnum = line(".")
+  let col = col(".")
+  echohl ModeMsg
+  echo getline(search("^[^ \t#/]\\{2}.*[^:]\s*$", 'bW'))
+  echohl None
+  call search("\\%" . lnum . "l" . "\\%" . col . "c")
+endfun
+
+" find files and populate the quickfix list
+fun! FindFiles(filename)
+  let error_file = tempname()
+  silent exe '!ag -g '.a:filename.' matlab/src > '.error_file
+  set errorformat=%f:%l:%m
+  exe "cfile ". error_file
+  copen
+  call delete(error_file)
+endfun
+command! -nargs=1 FindFile call FindFiles(<q-args>)
+
+color adonis
+set guifont=Monospace\ 12
+"set guifont=Monospace\ /12/-1/5/63/0/0/0/1/0
+" font family (Monospace)
+" point size (12)
+" pixel size (-1 = default)
+" style hint (what to do if requested family can't be found; 5=AnyStyle=default)
+" weight (50=normal, 25=light, 63=semibold, 75=bold, 87=black)
+" italic  (0=no)
+" underline (0=no)
+" strikeout (0=no)
+" fixedPitch (1=yes)
+" raw (0=no)
